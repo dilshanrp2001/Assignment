@@ -1,21 +1,14 @@
-import { Request, Response } from 'express';
-import { validationResult } from 'express-validator';
-import jwt from 'jsonwebtoken';
+import { Router } from 'express';
+import { login, logout } from '../controllers/authController';
+import { body } from 'express-validator';
 
-export const login = (req: Request, res: Response): void => {
-  const errors = validationResult(req);
-  if (!errors.isEmpty()) {
-    res.status(400).json({ errors: errors.array() });
-    return;
-  }
+const router = Router();
 
-  const { username, password } = req.body;
+router.post('/login', [
+  body('username').notEmpty().withMessage('Username is required'),
+  body('password').notEmpty().withMessage('Password is required')
+], login);
 
-  // Dummy authentication check
-  if (username === 'admin' && password === 'password') {
-    const token = jwt.sign({ username }, process.env.JWT_SECRET as string, { expiresIn: '1h' });
-    res.json({ token });
-  } else {
-    res.status(401).json({ message: 'Invalid credentials' });
-  }
-};
+router.post('/logout', logout);
+
+export default router;
